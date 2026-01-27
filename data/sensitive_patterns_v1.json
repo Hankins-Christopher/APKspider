@@ -1,0 +1,143 @@
+{
+  "version": "1.0",
+  "updated": "2025-02-14",
+  "sources": [
+    "https://github.com/danielmiessler/SecLists",
+    "https://github.com/danielmiessler/RobotsDisallowed",
+    "https://github.com/OWASP/www-project-mobile-security-testing-guide"
+  ],
+  "patterns": [
+    {
+      "id": "PATH_DOTENV",
+      "title": "Environment file detected",
+      "type": "path",
+      "regex": "(^|/)\\.env(\\.[^/]+)?$",
+      "description": "Dotenv files often contain secrets, API keys, or configuration values.",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "Secrets",
+      "rationale": "Dotenv files frequently contain plaintext secrets when shipped with apps.",
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+      ],
+      "masvs": ["MSTG-STORAGE-2"],
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N"
+    },
+    {
+      "id": "PATH_BACKUP_FILE",
+      "title": "Backup or swap file detected",
+      "type": "path",
+      "regex": "\\.((bak|old|backup|swp|tmp|orig))$",
+      "description": "Backup files can include older sensitive configurations or source code.",
+      "severity": "medium",
+      "confidence": "low",
+      "category": "Exposure",
+      "rationale": "Backup files are commonly left behind by tooling and can leak data.",
+      "references": [
+        "https://owasp.org/www-project-top-ten/"
+      ],
+      "masvs": ["MSTG-STORAGE-1"],
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+    },
+    {
+      "id": "PATH_DATABASE_FILE",
+      "title": "Database file detected",
+      "type": "path",
+      "regex": "\\.(db|sqlite|sqlite3)$",
+      "description": "SQLite databases may contain cached or persisted user data.",
+      "severity": "medium",
+      "confidence": "medium",
+      "category": "Data Storage",
+      "rationale": "Local databases often contain PII or auth data if not encrypted.",
+      "references": [
+        "https://mas.owasp.org/"
+      ],
+      "masvs": ["MSTG-STORAGE-2"],
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N"
+    },
+    {
+      "id": "CONTENT_AWS_ACCESS_KEY",
+      "title": "AWS access key ID",
+      "type": "content",
+      "regex": "AKIA[0-9A-Z]{16}",
+      "description": "AWS access key IDs can grant API access when paired with a secret key.",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "Secrets",
+      "rationale": "Known AWS key format strongly indicates a valid credential.",
+      "references": [
+        "https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html"
+      ],
+      "masvs": ["MSTG-STORAGE-2"],
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+      "entropy_threshold": 3.5
+    },
+    {
+      "id": "CONTENT_GCP_API_KEY",
+      "title": "Google API key",
+      "type": "content",
+      "regex": "AIza[0-9A-Za-z_-]{35}",
+      "description": "Google API keys should not be embedded in production apps.",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "Secrets",
+      "rationale": "Known API key format indicates potential access to Google services.",
+      "references": [
+        "https://cloud.google.com/docs/authentication/api-keys"
+      ],
+      "masvs": ["MSTG-STORAGE-2"],
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+      "entropy_threshold": 3.2
+    },
+    {
+      "id": "CONTENT_PRIVATE_KEY",
+      "title": "Private key material",
+      "type": "content",
+      "regex": "-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----",
+      "description": "Private keys embedded in apps can lead to full credential compromise.",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "Secrets",
+      "rationale": "PEM headers are strong evidence of private key material.",
+      "references": [
+        "https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html"
+      ],
+      "masvs": ["MSTG-STORAGE-2"],
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N"
+    },
+    {
+      "id": "CONTENT_JWT_TOKEN",
+      "title": "JWT token",
+      "type": "content",
+      "regex": "eyJ[A-Za-z0-9_-]+\\.eyJ[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+",
+      "description": "Hardcoded JWTs can expose sessions or API access.",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "Secrets",
+      "rationale": "JWT format is distinctive, but could be sample data.",
+      "references": [
+        "https://jwt.io/introduction"
+      ],
+      "masvs": ["MSTG-STORAGE-2"],
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+      "entropy_threshold": 3.3
+    },
+    {
+      "id": "CONTENT_BEARER_TOKEN",
+      "title": "Bearer token",
+      "type": "content",
+      "regex": "(?i)bearer\\s+[A-Za-z0-9\\-_.]{20,}",
+      "description": "Bearer tokens grant access to APIs and should not be embedded.",
+      "severity": "high",
+      "confidence": "low",
+      "category": "Secrets",
+      "rationale": "Bearer tokens may be placeholders; validate before treating as exploitable.",
+      "references": [
+        "https://datatracker.ietf.org/doc/html/rfc6750"
+      ],
+      "masvs": ["MSTG-STORAGE-2"],
+      "cvss_vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+      "entropy_threshold": 3.2
+    }
+  ]
+}

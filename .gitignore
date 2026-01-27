@@ -1,0 +1,40 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+
+# Environment files
+.env
+
+# System files
+.DS_Store
+
+# Playwright downloads (browsers, etc.)
+playwright/.cache/
+playwright/.chromium/
+playwright/.firefox/
+playwright/.webkit/
+
+# APK or XAPK files
+*.apk
+*.xapk
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# Extracted APK contents
+*_decompiled/
+*_extracted/
+
+# Logs and reports
+*.log
+*.txt
+
+# IDE or editor-specific files
+.idea/
+.vscode/
