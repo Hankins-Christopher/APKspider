@@ -1,0 +1,10 @@
+max_upload_bytes: 262144000
+max_extracted_bytes: 1073741824
+max_extract_files: 10000
+max_extract_file_bytes: 209715200
+job_timeout_seconds: 600
+job_cpu_seconds: 600
+job_memory_bytes: 2147483648
+job_fd_limit: 256
+job_nproc_limit: 128
+disable_job_network: true
