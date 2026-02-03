@@ -12,8 +12,10 @@ WORKDIR /app
 COPY api/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
-COPY . /app
-RUN pip install --no-cache-dir -e .
+COPY setup.py pyproject.toml __init__.py *.py /app/
+RUN pip install --no-cache-dir -e /app
+
+COPY api/ /app/api/
 
 RUN useradd --create-home --shell /usr/sbin/nologin appuser
 USER appuser

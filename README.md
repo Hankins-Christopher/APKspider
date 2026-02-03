@@ -150,7 +150,8 @@ docker compose up --build
 ```
 
 - Web UI: http://localhost:3000
-- API: http://localhost:8000
+- API (outside Docker, if port is published): http://<server-ip>:8000
+- API (inside Docker Compose, from web container): http://api:8000
 - Optional reverse proxy (nginx): `docker compose --profile proxy up --build` (proxy on http://localhost:8080)
 
 ## Configuration
