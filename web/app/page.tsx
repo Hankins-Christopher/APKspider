@@ -42,15 +42,7 @@ export default function HomePage() {
       setJobId(payload.job_id);
     } catch (err) {
       if (err instanceof Error && /networkerror|failed to fetch/i.test(err.message)) {
-        const isLocalDefault =
-          API_BASE === 'http://localhost:8000' ||
-          API_BASE.startsWith('http://localhost:') ||
-          API_BASE.startsWith('http://127.0.0.1:');
-        const baseMessage = 'Unable to reach the analysis service. Please confirm it is running and reachable.';
-        const hint = isLocalDefault
-          ? 'If the API is running elsewhere, set NEXT_PUBLIC_API_BASE_URL to its address and reload.'
-          : `Endpoint: ${API_BASE}`;
-        setError(`${baseMessage} ${hint}`);
+        setError(`Unable to reach the analysis service at ${API_BASE}. Please confirm it is running and reachable.`);
       } else {
         setError(err instanceof Error ? err.message : 'Upload failed');
       }
