@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *.pyo
+*.egg-info/
 
 # Virtual environments
 venv/
@@ -38,6 +39,8 @@ playwright/.webkit/
 
 # Logs and reports
 *.log
+*.txt
+!api/requirements.txt
 
 # IDE or editor-specific files
 .idea/
