@@ -13,6 +13,11 @@ venv/
 # System files
 .DS_Store
 
+# Node / Next.js
+node_modules/
+.next/
+out/
+
 # Playwright downloads (browsers, etc.)
 playwright/.cache/
 playwright/.chromium/
@@ -33,7 +38,6 @@ playwright/.webkit/
 
 # Logs and reports
 *.log
-*.txt
 
 # IDE or editor-specific files
 .idea/
