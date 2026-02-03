@@ -26,13 +26,34 @@ export default function HomePage() {
         body: form
       });
       if (!response.ok) {
-        const payload = await response.json();
-        throw new Error(payload.detail || 'Upload failed');
+        let message = 'Upload failed';
+        const text = await response.text();
+        if (text) {
+          try {
+            const payload = JSON.parse(text);
+            message = payload.detail || message;
+          } catch (parseError) {
+            message = text;
+          }
+        }
+        throw new Error(message);
       }
       const payload = await response.json();
       setJobId(payload.job_id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      if (err instanceof Error && /networkerror|failed to fetch/i.test(err.message)) {
+        const isLocalDefault =
+          API_BASE === 'http://localhost:8000' ||
+          API_BASE.startsWith('http://localhost:') ||
+          API_BASE.startsWith('http://127.0.0.1:');
+        const baseMessage = 'Unable to reach the analysis service. Please confirm it is running and reachable.';
+        const hint = isLocalDefault
+          ? 'If the API is running elsewhere, set NEXT_PUBLIC_API_BASE_URL to its address and reload.'
+          : `Endpoint: ${API_BASE}`;
+        setError(`${baseMessage} ${hint}`);
+      } else {
+        setError(err instanceof Error ? err.message : 'Upload failed');
+      }
     } finally {
       setIsUploading(false);
     }
