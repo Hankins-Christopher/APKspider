@@ -203,7 +203,7 @@ Assume hostile inputs:
 
 ## Development
 
-- API dependencies: `requirements-api.txt` (Docker) and `api/requirements.txt` (dev)
+- API dependencies: `api/requirements.txt`
 - Web dependencies: `web/package.json`
 - Tests: `pytest`
 
