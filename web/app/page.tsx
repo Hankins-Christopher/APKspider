@@ -26,13 +26,26 @@ export default function HomePage() {
         body: form
       });
       if (!response.ok) {
-        const payload = await response.json();
-        throw new Error(payload.detail || 'Upload failed');
+        let message = 'Upload failed';
+        const text = await response.text();
+        if (text) {
+          try {
+            const payload = JSON.parse(text);
+            message = payload.detail || message;
+          } catch (parseError) {
+            message = text;
+          }
+        }
+        throw new Error(message);
       }
       const payload = await response.json();
       setJobId(payload.job_id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      if (err instanceof Error && /networkerror|failed to fetch/i.test(err.message)) {
+        setError(`Unable to reach the analysis service at ${API_BASE}. Please confirm it is running and reachable.`);
+      } else {
+        setError(err instanceof Error ? err.message : 'Upload failed');
+      }
     } finally {
       setIsUploading(false);
     }
