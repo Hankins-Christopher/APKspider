@@ -2,6 +2,6 @@ fastapi
 passlib[bcrypt]
 python-multipart
 redis
-rq
+rq==1.15.1
 slowapi
 uvicorn
