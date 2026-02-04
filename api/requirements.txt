@@ -1,4 +1,6 @@
 fastapi
+jinja2
+httpx
 passlib[bcrypt]
 python-multipart
 redis

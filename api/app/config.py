@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 class Settings(BaseModel):
     app_data_dir: str = Field(default_factory=lambda: os.getenv("APP_DATA_DIR", "/var/lib/apkspider"))
     max_upload_bytes: int = Field(default_factory=lambda: int(os.getenv("MAX_UPLOAD_BYTES", str(250 * 1024 * 1024))))
+    upload_chunk_bytes: int = Field(default_factory=lambda: int(os.getenv("UPLOAD_CHUNK_BYTES", str(5 * 1024 * 1024))))
+    upload_session_ttl_seconds: int = Field(default_factory=lambda: int(os.getenv("UPLOAD_SESSION_TTL_SECONDS", "3600")))
     max_extracted_bytes: int = Field(default_factory=lambda: int(os.getenv("MAX_EXTRACTED_BYTES", str(1024 * 1024 * 1024))))
     max_extract_files: int = Field(default_factory=lambda: int(os.getenv("MAX_EXTRACT_FILES", "10000")))
     max_extract_file_bytes: int = Field(default_factory=lambda: int(os.getenv("MAX_EXTRACT_FILE_BYTES", str(200 * 1024 * 1024))))
@@ -21,6 +23,7 @@ class Settings(BaseModel):
     enable_basic_auth: bool = Field(default_factory=lambda: os.getenv("BASIC_AUTH_ENABLED", "false").lower() == "true")
     basic_auth_username: str = Field(default_factory=lambda: os.getenv("BASIC_AUTH_USERNAME", "admin"))
     basic_auth_password_hash: str = Field(default_factory=lambda: os.getenv("BASIC_AUTH_PASSWORD_HASH", ""))
+    scan_db_path: str = Field(default_factory=lambda: os.getenv("SCAN_DB_PATH", ""))
 
 
 settings = Settings()

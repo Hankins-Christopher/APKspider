@@ -143,6 +143,16 @@ We welcome contributions to APKSpider! Please follow standard PR practices and i
 
 APKSpider now includes a hardened web application for secure APK/XAPK uploads and background analysis. The web UI intentionally **does not** accept URLs or package names; only direct file uploads are supported.
 
+The primary output is a dashboard UI served by the FastAPI service:
+
+- Dashboard UI: http://localhost:8000/dashboard
+- JSON/SARIF export available from each scan detail page.
+
+Uploads use resumable chunked endpoints:
+- `POST /v1/upload/init`
+- `POST /v1/upload/chunk`
+- `POST /v1/upload/finish`
+
 ## Quick start (Docker)
 
 ```bash
@@ -162,6 +172,8 @@ You can also check `config/security.example.yaml` for baseline values.
 
 - `APP_DATA_DIR=/var/lib/apkspider` — persistent job storage
 - `MAX_UPLOAD_BYTES=262144000` (250MB)
+- `UPLOAD_CHUNK_BYTES=5242880` (5MB chunks for resumable uploads)
+- `UPLOAD_SESSION_TTL_SECONDS=3600`
 - `MAX_EXTRACTED_BYTES=1073741824` (1GB)
 - `MAX_EXTRACT_FILES=10000`
 - `MAX_EXTRACT_FILE_BYTES=209715200` (200MB)
@@ -172,6 +184,12 @@ You can also check `config/security.example.yaml` for baseline values.
 - `JOB_NPROC_LIMIT=128`
 - `DISABLE_JOB_NETWORK=true`
 - `ALLOWED_ORIGINS=http://localhost:3000`
+- `SCAN_DB_PATH=/var/lib/apkspider/scan_results.db`
+
+Optional AI enrichment:
+
+- `ENABLE_AI_ENRICHMENT=true`
+- `OPENAI_API_KEY=<token>`
 
 Optional basic auth:
 
@@ -201,6 +219,25 @@ Assume hostile inputs:
 - **Where files live**: job artifacts in `$APP_DATA_DIR` (uploads, logs, reports, work).
 - **Cleanup**: disable `KEEP_JOB_DIRS` to auto-delete workdirs after completion.
 - **Raising limits**: adjust `MAX_UPLOAD_BYTES` and `MAX_EXTRACTED_BYTES` and update reverse proxy `client_max_body_size` when applicable.
+- **Reverse proxy settings (nginx)**:
+  - `client_max_body_size 250m;`
+  - `proxy_read_timeout 600s;`
+  - `proxy_connect_timeout 600s;`
+  - `proxy_send_timeout 600s;`
+
+## CLI usage
+
+Scan from the CLI and persist results for the dashboard:
+
+```bash
+python main.py scan --apk /path/to/app.apk --output ./output --save-db ./scan_results.db
+```
+
+Serve the dashboard + API locally:
+
+```bash
+python main.py serve --host 0.0.0.0 --port 8080 --db ./scan_results.db
+```
 
 ## Development
 

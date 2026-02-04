@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% set title = "Findings for scan " ~ scan.id %}
+
+{% block content %}
+  <div class="card">
+    <form class="grid grid-3" method="get">
+      <div>
+        <label class="note">Severity</label>
+        <input class="pill" type="text" name="severity" value="{{ severity }}" placeholder="high" />
+      </div>
+      <div>
+        <label class="note">Category</label>
+        <input class="pill" type="text" name="category" value="{{ category }}" placeholder="Secrets" />
+      </div>
+      <div>
+        <label class="note">Search</label>
+        <input class="pill" type="text" name="query" value="{{ query }}" placeholder="keyword" />
+      </div>
+      <div>
+        <label class="note">Sort</label>
+        <select class="pill" name="sort">
+          <option value="risk" {% if sort == 'risk' %}selected{% endif %}>Risk</option>
+          <option value="severity" {% if sort == 'severity' %}selected{% endif %}>Severity</option>
+        </select>
+      </div>
+      <div style="align-self: end;">
+        <button class="button primary" type="submit">Apply filters</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top: 16px;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Severity</th>
+          <th>Confidence</th>
+          <th>CWE</th>
+          <th>File</th>
+          <th>Risk</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for finding in findings %}
+        <tr>
+          <td><a href="/dashboard/scans/{{ scan.id }}/findings/{{ finding.id }}">{{ finding.title }}</a></td>
+          <td>{{ finding.category }}</td>
+          <td><span class="badge {{ finding.severity }}">{{ finding.severity }}</span></td>
+          <td>{{ finding.confidence }}</td>
+          <td>{{ finding.cwe or '—' }}</td>
+          <td>{{ finding.file_path }}</td>
+          <td>{{ finding.risk_score }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7">No findings match the current filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>APKspider Dashboard</title>
+  <link rel="stylesheet" href="/static/dashboard.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <div class="note">APKspider Dashboard</div>
+        <h1>{{ title }}</h1>
+      </div>
+      <div class="nav-links">
+        <a class="button" href="/dashboard">Overview</a>
+        {% if scan %}
+        <a class="button" href="/dashboard/scans/{{ scan.id }}">Scan detail</a>
+        <a class="button" href="/dashboard/scans/{{ scan.id }}/findings">Findings</a>
+        {% endif %}
+      </div>
+    </div>
+    <div style="margin-top: 24px;">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>

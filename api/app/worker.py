@@ -12,6 +12,8 @@ from rq import Queue
 from api.app.config import settings
 from api.app.logging_utils import sanitize_log_line
 from api.app.store import JobStore
+from apkspider.scan_persistence import persist_scan
+from apkspider.scan_store import ScanStore
 from apkspider.pipeline import analyze_uploaded_apk
 from apkspider.security import validate_apk_structure, validate_xapk_structure
 
@@ -120,7 +122,17 @@ def run_job(job_id: str) -> None:
                 with open(summary_path, "w", encoding="utf-8") as handle:
                     handle.write("{}")
 
-            store.update(job_id, status="complete", progress="complete")
+            scan_db_path = settings.scan_db_path or os.path.join(settings.app_data_dir, "scan_results.db")
+            scan_store = ScanStore(scan_db_path)
+            decompiled_dir = os.path.join(work_root, "main_apk_decompiled")
+            scan_id = persist_scan(
+                report_dir=report_dir,
+                apk_path=input_copy,
+                decompiled_dir=decompiled_dir,
+                scan_store=scan_store,
+            )
+
+            store.update(job_id, status="complete", progress="complete", scan_id=scan_id)
             _log(job_id, "Job complete")
 
     except TimeoutError:

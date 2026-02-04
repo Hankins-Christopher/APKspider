@@ -11,6 +11,8 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [jobId, setJobId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [progressLabel, setProgressLabel] = useState('');
 
   const accepted = useMemo(() => ['.apk', '.xapk'], []);
 
@@ -18,28 +20,68 @@ export default function HomePage() {
     if (!file) return;
     setIsUploading(true);
     setError(null);
+    setProgress(0);
+    setProgressLabel('Initializing upload...');
     try {
-      const form = new FormData();
-      form.append('file', file);
-      const response = await fetch(`${API_BASE}/v1/jobs`, {
+      const initResponse = await fetch(`${API_BASE}/v1/upload/init`, {
         method: 'POST',
-        body: form
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: file.name,
+          total_size: file.size
+        })
       });
-      if (!response.ok) {
-        let message = 'Upload failed';
-        const text = await response.text();
-        if (text) {
-          try {
-            const payload = JSON.parse(text);
-            message = payload.detail || message;
-          } catch (parseError) {
-            message = text;
+      if (!initResponse.ok) {
+        throw new Error(await initResponse.text());
+      }
+      const initPayload = await initResponse.json();
+      const uploadId = initPayload.upload_id as string;
+      const serverChunkSize = initPayload.chunk_size || 5 * 1024 * 1024;
+      const totalChunks = initPayload.total_chunks || Math.ceil(file.size / serverChunkSize);
+
+      for (let index = 0; index < totalChunks; index += 1) {
+        const start = index * serverChunkSize;
+        const end = Math.min(start + serverChunkSize, file.size);
+        const blob = file.slice(start, end);
+        const form = new FormData();
+        form.append('upload_id', uploadId);
+        form.append('chunk_index', index.toString());
+        form.append('file', blob, file.name);
+
+        let attempts = 0;
+        let uploaded = false;
+        while (!uploaded && attempts < 3) {
+          attempts += 1;
+          const response = await fetch(`${API_BASE}/v1/upload/chunk`, {
+            method: 'POST',
+            body: form
+          });
+          if (response.ok) {
+            uploaded = true;
+          } else if (attempts >= 3) {
+            const message = await response.text();
+            throw new Error(message || 'Chunk upload failed');
           }
         }
-        throw new Error(message);
+        const pct = Math.round(((index + 1) / totalChunks) * 100);
+        setProgress(pct);
+        setProgressLabel(`Uploading chunk ${index + 1} of ${totalChunks}`);
       }
-      const payload = await response.json();
+
+      setProgressLabel('Finalizing upload...');
+      const finishResponse = await fetch(`${API_BASE}/v1/upload/finish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ upload_id: uploadId })
+      });
+      if (!finishResponse.ok) {
+        const message = await finishResponse.text();
+        throw new Error(message || 'Upload finish failed');
+      }
+      const payload = await finishResponse.json();
       setJobId(payload.job_id);
+      setProgress(100);
+      setProgressLabel('Upload complete');
     } catch (err) {
       if (err instanceof Error && /networkerror|failed to fetch/i.test(err.message)) {
         setError(`Unable to reach the analysis service at ${API_BASE}. Please confirm it is running and reachable.`);
@@ -106,6 +148,17 @@ export default function HomePage() {
               </a>
             )}
           </div>
+          {isUploading && (
+            <div className="space-y-2">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+                <div
+                  className="h-full rounded-full bg-indigo-500 transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="text-xs text-slate-500">{progressLabel}</p>
+            </div>
+          )}
         </Card>
 
         <section className="grid gap-6 md:grid-cols-3">

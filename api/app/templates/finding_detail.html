@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% set title = "Finding " ~ finding.id %}
+
+{% block content %}
+  <div class="card">
+    <div class="nav-links">
+      {% if prev_id %}
+      <a class="button" href="/dashboard/scans/{{ scan.id }}/findings/{{ prev_id }}">← Previous</a>
+      {% endif %}
+      {% if next_id %}
+      <a class="button" href="/dashboard/scans/{{ scan.id }}/findings/{{ next_id }}">Next →</a>
+      {% endif %}
+      <span class="pill">{{ index }} of {{ total_findings }}</span>
+    </div>
+    <h2>{{ finding.title }}</h2>
+    <p class="note">{{ finding.description }}</p>
+    <div class="chip-list">
+      <span class="badge {{ finding.severity }}">{{ finding.severity }}</span>
+      <span class="pill">Confidence: {{ finding.confidence }}</span>
+      <span class="pill">Category: {{ finding.category }}</span>
+      <span class="pill">Risk score: {{ finding.risk_score }} ({{ finding.risk_label }})</span>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top: 16px;">
+    <div class="card">
+      <h3>Evidence</h3>
+      <div class="kv">
+        <div>File/Path</div><div>{{ finding.file_path }}</div>
+        <div>Symbol</div><div>{{ finding.symbol or '—' }}</div>
+      </div>
+      <pre class="code" id="evidence">{{ finding.evidence }}</pre>
+      <button class="button" onclick="navigator.clipboard.writeText(document.getElementById('evidence').innerText)">Copy to clipboard</button>
+    </div>
+    <div class="card">
+      <h3>Risk score breakdown</h3>
+      <div class="kv">
+        {% for key, value in finding.risk_breakdown.items() %}
+        <div>{{ key.replace('_', ' ').title() }}</div><div>{{ value }}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top: 16px;">
+    <div class="card">
+      <h3>Why it matters</h3>
+      <p>{{ finding.why_it_matters }}</p>
+      {% if finding.ai_enrichment.ai_generated %}
+      <p class="note">AI-generated guidance, review before action.</p>
+      <p>{{ finding.ai_enrichment.ai_summary }}</p>
+      {% endif %}
+    </div>
+    <div class="card">
+      <h3>Exploit mapping</h3>
+      <p class="note">Heuristic mapping based on category and references.</p>
+      <div class="chip-list">
+        {% for technique in finding.exploit_mapping.techniques %}
+        <span class="pill">{{ technique }}</span>
+        {% endfor %}
+      </div>
+      {% if finding.exploit_mapping.known_exploits %}
+      <div style="margin-top: 10px;">
+        <strong>Known exploits:</strong>
+        <ul>
+          {% for exploit in finding.exploit_mapping.known_exploits %}
+          <li>{{ exploit }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid grid-2" style="margin-top: 16px;">
+    <div class="card">
+      <h3>Exposed credentials misuse</h3>
+      {% if finding.credential_misuse.secret_type %}
+      <p class="note">Best-effort inference based on detected patterns.</p>
+      <div class="kv">
+        <div>Secret type</div><div>{{ finding.credential_misuse.secret_type }}</div>
+        <div>Where found</div><div>{{ finding.file_path }}</div>
+      </div>
+      <h4>Likely abuse scenarios</h4>
+      <ul>
+        {% for scenario in finding.credential_misuse.likely_abuse_scenarios %}
+        <li>{{ scenario }}</li>
+        {% endfor %}
+      </ul>
+      <h4>Potential targets</h4>
+      <ul>
+        {% for target in finding.credential_misuse.potential_targets %}
+        <li>{{ target }}</li>
+        {% endfor %}
+      </ul>
+      <h4>Immediate response</h4>
+      <ul>
+        {% for step in finding.credential_misuse.immediate_response %}
+        <li>{{ step }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="note">No credential misuse mapping available for this finding.</p>
+      {% endif %}
+    </div>
+    <div class="card">
+      <h3>Remediation checklist</h3>
+      <ul>
+        {% for step in finding.remediation %}
+        <li>{{ step }}</li>
+        {% endfor %}
+      </ul>
+      <p class="note">Secure alternative: favor server-side secrets and Android Keystore-backed storage.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 16px;">
+    <h3>References</h3>
+    <div class="kv">
+      <div>CWE</div><div>{{ finding.references.cwe | join(', ') if finding.references.cwe else '—' }}</div>
+      <div>OWASP MSTG</div><div>{{ finding.references.owasp_mstg | join(', ') if finding.references.owasp_mstg else '—' }}</div>
+      <div>MASVS</div><div>{{ finding.references.masvs | join(', ') if finding.references.masvs else '—' }}</div>
+    </div>
+    {% if finding.references.references %}
+    <h4>Links</h4>
+    <ul>
+      {% for ref in finding.references.references %}
+      <li><a href="{{ ref }}" target="_blank">{{ ref }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+{% endblock %}

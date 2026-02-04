@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% set title = "Scan " ~ scan.id %}
+
+{% block content %}
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>App metadata</h2>
+      <div class="kv">
+        <div>Package</div><div>{{ scan.package_name or 'Unknown' }}</div>
+        <div>Version</div><div>{{ scan.version_name or '—' }} ({{ scan.version_code or '—' }})</div>
+        <div>Min SDK</div><div>{{ scan.min_sdk or '—' }}</div>
+        <div>Target SDK</div><div>{{ scan.target_sdk or '—' }}</div>
+        <div>SHA-256</div><div><code>{{ scan.sha256 }}</code></div>
+        <div>Overall risk</div><div><span class="badge {{ overall_label }}">{{ scan.overall_risk }} ({{ overall_label }})</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Permissions summary</h2>
+      <div class="chip-list">
+        {% for perm in permissions %}
+        <span class="pill">{{ perm }}</span>
+        {% else %}
+        <span class="note">No permissions extracted.</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-3" style="margin-top: 16px;">
+    <div class="card">
+      <h3>Findings by severity</h3>
+      {% for severity, count in severity_counts.items() %}
+      <div class="badge {{ severity }}">{{ severity|capitalize }}: {{ count }}</div>
+      {% else %}
+      <p class="note">No findings recorded.</p>
+      {% endfor %}
+    </div>
+    <div class="card">
+      <h3>Findings by category</h3>
+      {% for category, count in categories.items() %}
+      <div class="pill">{{ category }}: {{ count }}</div>
+      {% else %}
+      <p class="note">No categories available.</p>
+      {% endfor %}
+    </div>
+    <div class="card">
+      <h3>Export</h3>
+      <div class="nav-links">
+        <a class="button" href="/dashboard/scans/{{ scan.id }}/export.json">Download JSON</a>
+        <a class="button" href="/dashboard/scans/{{ scan.id }}/export.sarif">Download SARIF</a>
+      </div>
+      <p class="note">Use JSON for integrations and SARIF for CI systems.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 16px;">
+    <h2>Top risks</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Category</th>
+          <th>Severity</th>
+          <th>Risk score</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for finding in top_findings %}
+        <tr>
+          <td><a href="/dashboard/scans/{{ scan.id }}/findings/{{ finding.id }}">{{ finding.title }}</a></td>
+          <td>{{ finding.category }}</td>
+          <td><span class="badge {{ finding.severity }}">{{ finding.severity }}</span></td>
+          <td>{{ finding.risk_score }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">No findings available.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}
