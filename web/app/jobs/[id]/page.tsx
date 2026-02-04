@@ -14,6 +14,7 @@ type JobStatus = {
   created_at: string;
   updated_at: string;
   error_message?: string | null;
+  scan_id?: number | null;
 };
 
 type Summary = {
@@ -84,6 +85,14 @@ export default function JobPage() {
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Status: {status?.status ?? 'loading'} • Progress: {status?.progress ?? 'pending'}
           </p>
+          {status?.scan_id && (
+            <a
+              href={`${API_BASE}/dashboard/scans/${status.scan_id}`}
+              className="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+            >
+              View scan dashboard →
+            </a>
+          )}
         </header>
 
         <Card className="flex flex-col gap-4">

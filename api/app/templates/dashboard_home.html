@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% set title = "Recent scans" %}
+
+{% block content %}
+  <div class="card">
+    <h2>Recent scans</h2>
+    <p class="note">Browse previously completed APK scans. Click any scan to open the detailed report.</p>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Scan</th>
+          <th>Package</th>
+          <th>Version</th>
+          <th>Risk</th>
+          <th>Status</th>
+          <th>Created</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for scan in scans %}
+        <tr>
+          <td><a href="/dashboard/scans/{{ scan.id }}">#{{ scan.id }}</a></td>
+          <td>{{ scan.package_name or 'Unknown' }}</td>
+          <td>{{ scan.version_name or '—' }}</td>
+          <td>{{ scan.overall_risk }}</td>
+          <td>{{ scan.status }}</td>
+          <td>{{ scan.created_at }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6">No scans recorded yet. Run <code>python main.py scan --save-db</code> or upload via the web UI.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

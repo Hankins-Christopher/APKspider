@@ -23,6 +23,7 @@ class JobRecord:
     summary_path: str
     log_path: str
     error_message: str
+    scan_id: Optional[int]
 
 
 def _db_path() -> str:
@@ -51,10 +52,15 @@ def init_db() -> None:
                     report_dir TEXT NOT NULL,
                     summary_path TEXT NOT NULL,
                     log_path TEXT NOT NULL,
-                    error_message TEXT NOT NULL
+                    error_message TEXT NOT NULL,
+                    scan_id INTEGER
                 )
                 """
             )
+            try:
+                conn.execute("ALTER TABLE jobs ADD COLUMN scan_id INTEGER")
+            except sqlite3.OperationalError:
+                pass
             conn.commit()
         finally:
             conn.close()
@@ -75,8 +81,8 @@ class JobStore:
             try:
                 conn.execute(
                     """
-                    INSERT INTO jobs (job_id, status, progress, created_at, updated_at, upload_path, work_dir, report_dir, summary_path, log_path, error_message)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO jobs (job_id, status, progress, created_at, updated_at, upload_path, work_dir, report_dir, summary_path, log_path, error_message, scan_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         job_id,
@@ -90,6 +96,7 @@ class JobStore:
                         summary_path,
                         log_path,
                         "",
+                        None,
                     ),
                 )
                 conn.commit()
@@ -97,7 +104,14 @@ class JobStore:
                 conn.close()
         return self.get(job_id)
 
-    def update(self, job_id: str, status: Optional[str] = None, progress: Optional[str] = None, error_message: Optional[str] = None) -> JobRecord:
+    def update(
+        self,
+        job_id: str,
+        status: Optional[str] = None,
+        progress: Optional[str] = None,
+        error_message: Optional[str] = None,
+        scan_id: Optional[int] = None,
+    ) -> JobRecord:
         with _DB_LOCK:
             conn = _connect()
             try:
@@ -105,13 +119,14 @@ class JobStore:
                 new_status = status or record.status
                 new_progress = progress or record.progress
                 new_error = error_message if error_message is not None else record.error_message
+                new_scan_id = scan_id if scan_id is not None else record.scan_id
                 conn.execute(
                     """
                     UPDATE jobs
-                    SET status = ?, progress = ?, updated_at = ?, error_message = ?
+                    SET status = ?, progress = ?, updated_at = ?, error_message = ?, scan_id = ?
                     WHERE job_id = ?
                     """,
-                    (new_status, new_progress, _now(), new_error, job_id),
+                    (new_status, new_progress, _now(), new_error, new_scan_id, job_id),
                 )
                 conn.commit()
             finally:
@@ -124,7 +139,7 @@ class JobStore:
             try:
                 row = conn.execute(
                     """
-                    SELECT job_id, status, progress, created_at, updated_at, upload_path, work_dir, report_dir, summary_path, log_path, error_message
+                    SELECT job_id, status, progress, created_at, updated_at, upload_path, work_dir, report_dir, summary_path, log_path, error_message, scan_id
                     FROM jobs WHERE job_id = ?
                     """,
                     (job_id,),
