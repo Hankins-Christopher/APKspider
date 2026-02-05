@@ -13,6 +13,8 @@ ALLOWED_ZIP_MIME_TYPES = {
     "application/zip",
     "application/java-archive",
     "application/x-zip-compressed",
+    "application/vnd.android.package-archive",
+    "application/octet-stream",
 }
 
 CONTROL_CHAR_RE = re.compile(r"[\x00-\x1f\x7f]")

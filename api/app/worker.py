@@ -157,4 +157,9 @@ def get_queue() -> Queue:
 
 def enqueue_job(job_id: str) -> None:
     queue = get_queue()
-    queue.enqueue(run_job, job_id, job_id=job_id)
+    queue.enqueue(
+        run_job,
+        job_id,
+        job_id=job_id,
+        job_timeout=int(settings.job_timeout_seconds) + 30,
+    )
