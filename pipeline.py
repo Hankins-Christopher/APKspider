@@ -2,9 +2,9 @@ import os
 import shutil
 from typing import Optional
 
-from apkspider.analysis import run_analysis
-from apkspider.decompiler import decompile_apk
-from apkspider.extractor import (
+from analysis import run_analysis
+from decompiler import decompile_apk
+from extractor import (
     DEFAULT_MAX_EXTRACT_BYTES,
     DEFAULT_MAX_EXTRACT_FILES,
     DEFAULT_MAX_FILE_BYTES,

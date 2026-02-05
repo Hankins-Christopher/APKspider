@@ -8,8 +8,8 @@ from fastapi.templating import Jinja2Templates
 
 from api.app.auth import basic_auth
 from api.app.config import settings
-from apkspider.scan_store import ScanStore
-from apkspider.scoring import label_from_score
+from scan_store import ScanStore
+from scoring import label_from_score
 
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), "templates")
 

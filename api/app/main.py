@@ -24,7 +24,7 @@ from api.app.dashboard import router as dashboard_router
 from api.app.logging_utils import sanitize_log_lines
 from api.app.store import JobStore
 from api.app.worker import enqueue_job
-from apkspider.security import (
+from security import (
     generate_safe_filename,
     is_safe_client_filename,
     safe_zip_directory,

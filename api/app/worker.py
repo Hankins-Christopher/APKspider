@@ -12,10 +12,10 @@ from rq import Queue
 from api.app.config import settings
 from api.app.logging_utils import sanitize_log_line
 from api.app.store import JobStore
-from apkspider.scan_persistence import persist_scan
-from apkspider.scan_store import ScanStore
-from apkspider.pipeline import analyze_uploaded_apk
-from apkspider.security import validate_apk_structure, validate_xapk_structure
+from scan_persistence import persist_scan
+from scan_store import ScanStore
+from pipeline import analyze_uploaded_apk
+from security import validate_apk_structure, validate_xapk_structure
 
 store = JobStore()
 

@@ -3,9 +3,9 @@ import os
 from dataclasses import dataclass
 from typing import List
 
-from apkspider.patterns import PatternDefinition
-from apkspider.report import Finding
-from apkspider.scoring import score_from_base
+from patterns import PatternDefinition
+from report import Finding
+from scoring import score_from_base
 
 SKIP_DIRS = {
     "res",

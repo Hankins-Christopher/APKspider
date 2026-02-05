@@ -1,6 +1,16 @@
 version: '3.9'
 
 services:
+  init-perms:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    user: "0:0"
+    command: ["sh", "-lc", "mkdir -p /var/lib/apkspider && chown -R 1000:1000 /var/lib/apkspider && chmod -R 750 /var/lib/apkspider"]
+    volumes:
+      - apkspider-data:/var/lib/apkspider
+    restart: "no"
+
   redis:
     image: redis:7.2-alpine
     command: ["redis-server", "--save", "", "--appendonly", "no"]
@@ -24,7 +34,10 @@ services:
       - JOB_TIMEOUT_SECONDS=600
       - DISABLE_JOB_NETWORK=true
     depends_on:
-      - redis
+      init-perms:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
     ports:
       - "8000:8000"
     volumes:
@@ -51,7 +64,10 @@ services:
       - JOB_TIMEOUT_SECONDS=600
       - DISABLE_JOB_NETWORK=true
     depends_on:
-      - redis
+      init-perms:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
     volumes:
       - apkspider-data:/var/lib/apkspider
     read_only: true

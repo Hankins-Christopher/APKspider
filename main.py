@@ -5,11 +5,11 @@ from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from apkspider.downloader import download_apk, download_from_url
-from apkspider.pipeline import analyze_uploaded_apk
-from apkspider.scan_persistence import persist_scan
-from apkspider.scan_store import ScanStore
-from apkspider.utils import print_banner
+from downloader import download_apk, download_from_url
+from pipeline import analyze_uploaded_apk
+from scan_persistence import persist_scan
+from scan_store import ScanStore
+from utils import print_banner
 
 WORK_DIR = os.getcwd()
 
