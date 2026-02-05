@@ -162,20 +162,21 @@ cp .env.example .env
 ```
 
 1. Edit `.env` and set `HOST_IP` to the host IP or DNS name reachable by the browser client.
-2. Optionally adjust `WEB_PORT` and `API_PORT`.
-3. First run only (or whenever the named volume is recreated):
+2. Update `WEB_ORIGIN`, `API_BASE_URL`, `NEXT_PUBLIC_API_BASE_URL`, `API_ORIGIN`, and `ALLOWED_ORIGINS` so they exactly match your host/IP and exposed ports.
+3. Optionally adjust `WEB_PORT` and `API_PORT`.
+4. First run only (or whenever the named volume is recreated):
 
 ```bash
 docker compose run --rm init-perms
 ```
 
-4. Rebuild web with the current env values baked into the Next.js client bundle:
+5. Rebuild web with the current env values baked into the Next.js client bundle:
 
 ```bash
 docker compose build --no-cache web
 ```
 
-5. Start the stack:
+6. Start the stack:
 
 ```bash
 docker compose up -d --build
@@ -214,6 +215,15 @@ docker compose exec web sh -lc 'grep -RIn "http://api:8000" /app/.next 2>/dev/nu
 docker compose exec web sh -lc 'grep -RIn "${HOST_IP}:${API_PORT}" /app/.next 2>/dev/null | head -n 5 || true'
 ```
 
+## Troubleshooting: jobs stuck or timing out
+
+- If jobs fail with `rq.timeouts.JobTimeoutException` around 180 seconds, increase `JOB_TIMEOUT_SECONDS` in `.env` and restart services.
+- Verify queue health from the worker container:
+
+```bash
+docker compose exec worker rq info --url "$REDIS_URL"
+```
+
 ## Configuration
 
 Environment variables (defaults shown):
@@ -233,8 +243,8 @@ You can also check `config/security.example.yaml` for baseline values.
 - `JOB_FD_LIMIT=256`
 - `JOB_NPROC_LIMIT=128`
 - `DISABLE_JOB_NETWORK=true`
-- `API_ORIGIN=http://$HOST_IP:$WEB_PORT`
-- `ALLOWED_ORIGINS=http://$HOST_IP:$WEB_PORT,http://localhost:$WEB_PORT`
+- `API_ORIGIN=http://10.5.33.48:3000`
+- `ALLOWED_ORIGINS=http://10.5.33.48:3000,http://localhost:3000`
 - `SCAN_DB_PATH=/var/lib/apkspider/scan_results.db`
 
 Optional AI enrichment:
