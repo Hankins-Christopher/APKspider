@@ -2,10 +2,10 @@ import json
 import os
 from typing import List
 
-from apkspider import __version__
-from apkspider.patterns import load_pattern_metadata, load_patterns
-from apkspider.report import Finding, build_report, render_summary
-from apkspider.scanner import ScanConfig, scan_decompiled_dir
+from __init__ import __version__
+from patterns import load_pattern_metadata, load_patterns
+from report import Finding, build_report, render_summary
+from scanner import ScanConfig, scan_decompiled_dir
 
 
 def _severity_counts(findings: List[Finding]) -> dict:

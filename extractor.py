@@ -2,7 +2,7 @@ import os
 import zipfile
 from typing import List
 
-from apkspider.security import (
+from security import (
     safe_extract_zip,
     validate_apk_structure,
     validate_xapk_structure,

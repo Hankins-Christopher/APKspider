@@ -3,7 +3,7 @@ import json
 import os
 from typing import Any, Dict, List
 
-from apkspider.enrichment import (
+from enrichment import (
     build_references,
     build_remediation_steps,
     build_why_it_matters,
@@ -11,9 +11,9 @@ from apkspider.enrichment import (
     infer_credential_misuse,
     maybe_ai_enrich,
 )
-from apkspider.manifest import parse_manifest
-from apkspider.scan_store import ScanStore
-from apkspider.scoring import label_from_score, score_with_modifiers
+from manifest import parse_manifest
+from scan_store import ScanStore
+from scoring import label_from_score, score_with_modifiers
 
 
 def _sha256_file(path: str) -> str:

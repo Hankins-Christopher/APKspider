@@ -156,7 +156,18 @@ Uploads use resumable chunked endpoints:
 ## Quick start (Docker)
 
 ```bash
-docker compose up --build
+git clone https://github.com/Hankins-Christopher/APKspider.git
+cd APKspider
+docker compose build
+docker compose run --rm init-perms
+# first run only (or whenever the named volume is recreated)
+docker compose up -d
+```
+
+Verify service reachability from the web container:
+
+```bash
+docker compose exec web sh -lc "wget -S -O- http://api:8000/dashboard 2>&1 | head -n 5"
 ```
 
 - Web UI: http://localhost:3000
