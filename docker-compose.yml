@@ -25,21 +25,31 @@ services:
       context: .
       dockerfile: api/Dockerfile
     environment:
-      - APP_DATA_DIR=/var/lib/apkspider
-      - REDIS_URL=redis://redis:6379/0
-      - ALLOWED_ORIGINS=http://localhost:3000
-      - MAX_UPLOAD_BYTES=262144000
-      - MAX_EXTRACTED_BYTES=1073741824
-      - MAX_EXTRACT_FILES=10000
-      - JOB_TIMEOUT_SECONDS=600
-      - DISABLE_JOB_NETWORK=true
+      - APP_DATA_DIR=${APP_DATA_DIR}
+      - REDIS_URL=${REDIS_URL}
+      - API_ORIGIN=${API_ORIGIN}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - MAX_UPLOAD_BYTES=${MAX_UPLOAD_BYTES}
+      - UPLOAD_CHUNK_BYTES=${UPLOAD_CHUNK_BYTES}
+      - UPLOAD_SESSION_TTL_SECONDS=${UPLOAD_SESSION_TTL_SECONDS}
+      - MAX_EXTRACTED_BYTES=${MAX_EXTRACTED_BYTES}
+      - MAX_EXTRACT_FILES=${MAX_EXTRACT_FILES}
+      - MAX_EXTRACT_FILE_BYTES=${MAX_EXTRACT_FILE_BYTES}
+      - JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT_SECONDS}
+      - JOB_CPU_SECONDS=${JOB_CPU_SECONDS}
+      - JOB_MEMORY_BYTES=${JOB_MEMORY_BYTES}
+      - JOB_FD_LIMIT=${JOB_FD_LIMIT}
+      - JOB_NPROC_LIMIT=${JOB_NPROC_LIMIT}
+      - DISABLE_JOB_NETWORK=${DISABLE_JOB_NETWORK}
+      - KEEP_JOB_DIRS=${KEEP_JOB_DIRS}
+      - SCAN_DB_PATH=${SCAN_DB_PATH}
     depends_on:
       init-perms:
         condition: service_completed_successfully
       redis:
         condition: service_started
     ports:
-      - "8000:8000"
+      - "${API_PORT}:8000"
     volumes:
       - apkspider-data:/var/lib/apkspider
     read_only: true
@@ -56,13 +66,22 @@ services:
       dockerfile: api/Dockerfile
     command: ["python", "-m", "api.app.worker_runner"]
     environment:
-      - APP_DATA_DIR=/var/lib/apkspider
-      - REDIS_URL=redis://redis:6379/0
-      - MAX_UPLOAD_BYTES=262144000
-      - MAX_EXTRACTED_BYTES=1073741824
-      - MAX_EXTRACT_FILES=10000
-      - JOB_TIMEOUT_SECONDS=600
-      - DISABLE_JOB_NETWORK=true
+      - APP_DATA_DIR=${APP_DATA_DIR}
+      - REDIS_URL=${REDIS_URL}
+      - MAX_UPLOAD_BYTES=${MAX_UPLOAD_BYTES}
+      - UPLOAD_CHUNK_BYTES=${UPLOAD_CHUNK_BYTES}
+      - UPLOAD_SESSION_TTL_SECONDS=${UPLOAD_SESSION_TTL_SECONDS}
+      - MAX_EXTRACTED_BYTES=${MAX_EXTRACTED_BYTES}
+      - MAX_EXTRACT_FILES=${MAX_EXTRACT_FILES}
+      - MAX_EXTRACT_FILE_BYTES=${MAX_EXTRACT_FILE_BYTES}
+      - JOB_TIMEOUT_SECONDS=${JOB_TIMEOUT_SECONDS}
+      - JOB_CPU_SECONDS=${JOB_CPU_SECONDS}
+      - JOB_MEMORY_BYTES=${JOB_MEMORY_BYTES}
+      - JOB_FD_LIMIT=${JOB_FD_LIMIT}
+      - JOB_NPROC_LIMIT=${JOB_NPROC_LIMIT}
+      - DISABLE_JOB_NETWORK=${DISABLE_JOB_NETWORK}
+      - KEEP_JOB_DIRS=${KEEP_JOB_DIRS}
+      - SCAN_DB_PATH=${SCAN_DB_PATH}
     depends_on:
       init-perms:
         condition: service_completed_successfully
@@ -84,10 +103,12 @@ services:
     build:
       context: .
       dockerfile: web/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
     environment:
-      - NEXT_PUBLIC_API_BASE_URL=http://api:8000
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
     ports:
-      - "3000:3000"
+      - "${WEB_PORT}:3000"
     read_only: true
     tmpfs:
       - /tmp
