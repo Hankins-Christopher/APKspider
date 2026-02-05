@@ -153,27 +153,66 @@ Uploads use resumable chunked endpoints:
 - `POST /v1/upload/chunk`
 - `POST /v1/upload/finish`
 
-## Quick start (Docker)
+## Install (Docker)
 
 ```bash
 git clone https://github.com/Hankins-Christopher/APKspider.git
 cd APKspider
-docker compose build
-docker compose run --rm init-perms
-# first run only (or whenever the named volume is recreated)
-docker compose up -d
+cp .env.example .env
 ```
 
-Verify service reachability from the web container:
+1. Edit `.env` and set `HOST_IP` to the host IP or DNS name reachable by the browser client.
+2. Optionally adjust `WEB_PORT` and `API_PORT`.
+3. First run only (or whenever the named volume is recreated):
 
 ```bash
-docker compose exec web sh -lc "wget -S -O- http://api:8000/dashboard 2>&1 | head -n 5"
+docker compose run --rm init-perms
 ```
 
-- Web UI: http://localhost:3000
-- API (outside Docker, if port is published): http://<server-ip>:8000
-- API (inside Docker Compose, from web container): http://api:8000
+4. Rebuild web with the current env values baked into the Next.js client bundle:
+
+```bash
+docker compose build --no-cache web
+```
+
+5. Start the stack:
+
+```bash
+docker compose up -d --build
+```
+
+- Web UI: `${WEB_ORIGIN}`
+- API (outside Docker, if port is published): `${API_BASE_URL}`
+- API (inside Docker Compose, from containers): `http://api:8000`
 - Optional reverse proxy (nginx): `docker compose --profile proxy up --build` (proxy on http://localhost:8080)
+
+## Verification
+
+```bash
+docker compose exec web sh -lc 'getent hosts api && wget -S -O- http://api:8000/dashboard 2>&1 | head -n 12'
+```
+
+From your laptop/browser:
+- Open `${WEB_ORIGIN}`
+- Open `${API_BASE_URL}/dashboard`
+
+## Troubleshooting: analysis service unreachable
+
+- `api` is a Docker-internal hostname. Browsers outside Docker cannot resolve `http://api:8000`.
+- The browser must call the API via `${API_BASE_URL}` derived from `.env` and baked into `NEXT_PUBLIC_API_BASE_URL` at build time.
+- If `.env` changes, rebuild web so Next.js re-bakes client-side config.
+
+```bash
+docker compose build --no-cache web
+docker compose up -d --build web
+```
+
+Checks:
+
+```bash
+docker compose exec web sh -lc 'grep -RIn "http://api:8000" /app/.next 2>/dev/null | head -n 5 || true'
+docker compose exec web sh -lc 'grep -RIn "${HOST_IP}:${API_PORT}" /app/.next 2>/dev/null | head -n 5 || true'
+```
 
 ## Configuration
 
@@ -194,7 +233,8 @@ You can also check `config/security.example.yaml` for baseline values.
 - `JOB_FD_LIMIT=256`
 - `JOB_NPROC_LIMIT=128`
 - `DISABLE_JOB_NETWORK=true`
-- `ALLOWED_ORIGINS=http://localhost:3000`
+- `API_ORIGIN=http://$HOST_IP:$WEB_PORT`
+- `ALLOWED_ORIGINS=http://$HOST_IP:$WEB_PORT,http://localhost:$WEB_PORT`
 - `SCAN_DB_PATH=/var/lib/apkspider/scan_results.db`
 
 Optional AI enrichment:
